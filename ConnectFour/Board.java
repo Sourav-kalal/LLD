@@ -1,51 +1,38 @@
-import java.util.Arrays;
-
 public class Board {
-    public static final int ROWS = 6;
-    public static final int COLUMNS = 7;
+    int ROW = 6;
+    int COL = 7;
+    Color[][] grid;
+    State currentState;
 
-    // null means the cell is empty.
-    private final Color[][] grid = new Color[ROWS][COLUMNS];
+    public Board() {
+        grid = new Color[ROW][COL];
+        currentState = State.IN_PROGRESS;
+    }
 
     public int getRow() {
-        return ROWS;
+        return ROW;
     }
 
     public int getColumn() {
-        return COLUMNS;
+        return COL;
     }
 
-    public Color getCell(int row, int column) {
-        if (!isInBound(row, column)) {
-            throw new IndexOutOfBoundsException("Cell is outside the board.");
-        }
-        return grid[row][column];
-    }
-
-    public boolean isInBound(int row, int column) {
-        return row >= 0 && row < ROWS && column >= 0 && column < COLUMNS;
-    }
-
-    public boolean canPlace(int column) {
-        return column >= 0 && column < COLUMNS && grid[0][column] == null;
-    }
-
-    /**
-     * Drops a player's disc into the requested column.
-     * Returns the row where it landed, or -1 if the column is invalid/full.
-     */
-    public int placeDisc(Player player, int column) {
-        if (player == null || !canPlace(column)) {
-            return -1;
+    public boolean placeDisc(Player player, int column) {
+        if (player == null || !canPlace(player, column)) {
+            return false;
         }
 
-        for (int row = ROWS - 1; row >= 0; row--) {
+        for (int row = ROW - 1; row >= 0; row--) {
             if (grid[row][column] == null) {
                 grid[row][column] = player.getColor();
-                return row;
+                return true;
             }
         }
-        return -1;
+        return false;
+    }
+
+    public boolean canPlace(Player player, int column) {
+        return player != null && isInBound(0, column) && grid[0][column] == null;
     }
 
     public boolean canWin(Player player, int row, int column) {
@@ -55,10 +42,7 @@ public class Board {
         }
 
         int[][] directions = {
-            {0, 1},   // horizontal
-            {1, 0},   // vertical
-            {1, 1},   // diagonal down-right / up-left
-            {1, -1}   // diagonal down-left / up-right
+            {0, 1}, {1, 0}, {1, 1}, {1, -1}
         };
 
         for (int[] direction : directions) {
@@ -86,24 +70,15 @@ public class Board {
     }
 
     public boolean isFull() {
-        for (Color[] row : grid) {
-            for (Color cell : row) {
-                if (cell == null) {
-                    return false;
-                }
+        for (int column = 0; column < COL; column++) {
+            if (grid[0][column] == null) {
+                return false;
             }
         }
         return true;
     }
 
-    public void printBoard() {
-        for (Color[] row : grid) {
-            System.out.print("|");
-            for (Color cell : row) {
-                System.out.print((cell == null ? " " : cell == Color.RED ? "R" : "B") + "|");
-            }
-            System.out.println();
-        }
-        System.out.println(" 0 1 2 3 4 5 6");
+    public boolean isInBound(int row, int column) {
+        return row >= 0 && row < ROW && column >= 0 && column < COL;
     }
 }
